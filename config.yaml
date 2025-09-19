@@ -1,0 +1,19 @@
+testing: false  # set true if you later switch to a sandbox
+
+email:
+  smtp_server: smtp.gmail.com
+  smtp_port: 587
+  username: ${GMAIL_USER}
+  password: ${GMAIL_PASS}
+  to: jobscouttest123@gmail.com
+
+salary_floor:
+  au_yearly_gross: 65000
+  uk_yearly_gross: 31000
+  au_day_rate: 450
+  uk_day_rate: 250
+
+allowed_types: ["full-time", "part-time", "contract", "casual"]
+allowed_countries: ["AU", "UK"]
+accept_remote: true
+results_per_day: 3

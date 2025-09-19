@@ -1,0 +1,4 @@
+feeds:
+  - url: https://weworkremotely.com/categories/remote-design-jobs.rss
+    label: weworkremotely
+# Add more feeds here as needed
