@@ -2,7 +2,7 @@ import imaplib, email, re, os
 from bs4 import BeautifulSoup
 
 # Regex to match EthicalJobs links (raw string, all quotes properly escaped)
-LINK_RE = re.compile("https://(?:www\.)?ethicaljobs\.com\.au/[^\s]+", re.I)
+LINK_RE = re.compile(r'https?://(?:www\.)?ethicaljobs\.com\.au/[^\s"\'<>]+', re.I)
 
 def fetch_ethicaljobs_from_gmail(max_messages=40):
     """
