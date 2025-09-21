@@ -2,7 +2,7 @@ name: JobScout Daily
 
 on:
   schedule:
-    - cron: "0 9 * * *"   # Runs daily at 09:00 UTC
+    - cron: "0 23 * * *"   # Runs daily at 23:00 UTC 9am next day Melbourne (AEST)
   workflow_dispatch: {}   # lets you run it manually
 
 jobs:
