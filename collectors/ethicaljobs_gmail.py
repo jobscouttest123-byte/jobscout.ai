@@ -1,7 +1,7 @@
 import imaplib, email, os
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
-
+LINK_RE = re.compile(r'https?://(?:www\.)?ethicaljobs\.com\.au/[^"\'\s>]+', re.I)
 def _is_ethicaljobs_link(href: str) -> bool:
     if not href or not href.startswith("http"):
         return False
