@@ -2,11 +2,14 @@ import yaml
 from collectors.remotive import fetch_remotive
 from collectors.adzuna import fetch_adzuna
 from collectors.rss_feeds import fetch_from_feeds
-# --- EthicalJobs disabled (stub) ---
-def fetch_ethicaljobs_from_gmail(*args, **kwargs):
-    # Temporarily return nothing so the rest of the pipeline runs
-    return []
-# -----------------------------------
+# --- Force-disable EthicalJobs collector (handles SyntaxError too) ---
+try:
+    from collectors.ethicaljobs_gmail import fetch_ethicaljobs_from_gmail  # leave as-is if it works
+except Exception as e:  # catches SyntaxError raised during import as well
+    print(f"[JobScout] EthicalJobs collector disabled: {e}")
+    def fetch_ethicaljobs_from_gmail(*args, **kwargs):
+        return []
+# --------------------------------------------------------------------
 
 from core.normalize import normalize
 from core.filters import filter_jobs
