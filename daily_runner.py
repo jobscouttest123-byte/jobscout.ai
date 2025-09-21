@@ -2,7 +2,12 @@ import yaml
 from collectors.remotive import fetch_remotive
 from collectors.adzuna import fetch_adzuna
 from collectors.rss_feeds import fetch_from_feeds
-# from collectors.ethicaljobs_gmail import fetch_ethicaljobs_from_gmail  # DISABLED
+# --- EthicalJobs disabled (stub) ---
+def fetch_ethicaljobs_from_gmail(*args, **kwargs):
+    # Temporarily return nothing so the rest of the pipeline runs
+    return []
+# -----------------------------------
+
 from core.normalize import normalize
 from core.filters import filter_jobs
 from core.scorer import score_job
