@@ -2,7 +2,7 @@ import yaml
 from collectors.remotive import fetch_remotive
 from collectors.adzuna import fetch_adzuna
 from collectors.rss_feeds import fetch_from_feeds
-from collectors.ethicaljobs_gmail import fetch_ethicaljobs_from_gmail
+# from collectors.ethicaljobs_gmail import fetch_ethicaljobs_from_gmail  # DISABLED
 from core.normalize import normalize
 from core.filters import filter_jobs
 from core.scorer import score_job
@@ -32,7 +32,7 @@ def collect_all():
         if url:
             for j in fetch_from_feeds([url], source_label=label):
                 raw.append((j,label))
-    raw += [(j, "ethicaljobs_gmail") for j in fetch_ethicaljobs_from_gmail()]
+    # raw += [(j, "ethicaljobs_gmail") for j in fetch_ethicaljobs_from_gmail()]  # DISABLED
 
     jobs = []
     for j,s in raw:
