@@ -1,75 +1,86 @@
 import imaplib, email, re, os
 from bs4 import BeautifulSoup
 
-# Match EthicalJobs job links
-LINK_RE = re.compile(r"https?://(?:www\.)?ethicaljobs\.com\.au/[^\s\"'>]+", re.I)
+# Regex to match EthicalJobs links (raw string, all quotes properly escaped)
+LINK_RE = re.compile(r'https?://(?:www\.)?ethicaljobs\.com\.au/[^\s"\'>]+', re.I)
 
-def fetch_ethicaljobs_from_gmail(max_messages=30):
-    """Fetch EthicalJobs links from Gmail using IMAP + App Password."""
-    jobs = []
+def fetch_ethicaljobs_from_gmail(max_messages=40):
+    """
+    Fetch EthicalJobs links from Gmail using IMAP + App Password.
+    Requires env: GMAIL_USER, GMAIL_PASS
+    """
     user = os.getenv("GMAIL_USER")
     pw = os.getenv("GMAIL_PASS")
+    jobs = []
+
     if not user or not pw:
+        print("[ethicaljobs_gmail] Missing GMAIL_USER/GMAIL_PASS")
         return jobs
 
-    # 1) Connect to Gmail IMAP
+    # 1) Connect & login (IMAP is always on for personal Gmail)
     imap = imaplib.IMAP4_SSL("imap.gmail.com")
     imap.login(user, pw)
     imap.select("INBOX")
 
-    # 2) Search for EthicalJobs alert emails
+    # 2) Search for alert emails (adjust if your sender is different)
     status, data = imap.search(None, 'FROM "alerts@ethicaljobs.com.au"')
     if status != "OK":
+        print("[ethicaljobs_gmail] IMAP search failed")
         imap.logout()
         return jobs
 
-    # 3) Read latest messages (limit for speed)
-    for num in data[0].split()[-max_messages:]:
+    msg_nums = data[0].split()[-max_messages:]
+
+    # 3) Parse each email and extract links from HTML body
+    for num in msg_nums:
         status, msg_data = imap.fetch(num, "(RFC822)")
         if status != "OK":
             continue
 
         msg = email.message_from_bytes(msg_data[0][1])
+        subject = msg.get("Subject", "EthicalJobs alert")
 
-        # Prefer HTML body for links
-        body_html = None
+        # Prefer HTML body
+        html = None
         if msg.is_multipart():
             for part in msg.walk():
                 if part.get_content_type() == "text/html":
-                    body_html = part.get_payload(decode=True).decode(
-                        part.get_content_charset() or "utf-8", errors="ignore"
-                    )
-                    break
+                    html = part.get_payload(decode=True)
+                    if html:
+                        html = html.decode(part.get_content_charset() or "utf-8", errors="ignore")
+                        break
         else:
             if msg.get_content_type() == "text/html":
-                body_html = msg.get_payload(decode=True).decode(
-                    msg.get_content_charset() or "utf-8", errors="ignore"
-                )
+                html = msg.get_payload(decode=True)
+                if html:
+                    html = html.decode(msg.get_content_charset() or "utf-8", errors="ignore")
 
-        # 4) Extract EthicalJobs links
-        if body_html:
-            soup = BeautifulSoup(body_html, "html.parser")
-            for a in soup.find_all("a", href=True):
-                href = a["href"]
-                if LINK_RE.search(href):
-                    jobs.append({
-                        "source": "ethicaljobs_gmail",
-                        "title": msg.get("Subject", "EthicalJobs listing"),
-                        "company": None,
-                        "location": None,
-                        "country": "AU",
-                        "remote": None,
-                        "employment_type": None,
-                        "salary_text": None,
-                        "salary_min": None,
-                        "salary_max": None,
-                        "currency": None,
-                        "link": href,
-                        "description": "Discovered via EthicalJobs Gmail alert",
-                        "posted_at": None
-                    })
+        if not html:
+            continue
 
-    # 5) Cleanup
+        soup = BeautifulSoup(html, "html.parser")
+        # Find all anchors and test hrefs against regex
+        for a in soup.find_all("a", href=True):
+            href = a["href"]
+            if LINK_RE.search(href):
+                jobs.append({
+                    "source": "ethicaljobs_gmail",
+                    "title": subject,
+                    "company": None,
+                    "location": None,
+                    "country": "AU",
+                    "remote": None,
+                    "employment_type": None,
+                    "salary_text": None,
+                    "salary_min": None,
+                    "salary_max": None,
+                    "currency": None,
+                    "link": href,
+                    "description": "Link extracted from EthicalJobs alert email",
+                    "posted_at": None
+                })
+
     imap.close()
     imap.logout()
+    print(f"[ethicaljobs_gmail] Collected {len(jobs)} links")
     return jobs
