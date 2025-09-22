@@ -1,59 +1,50 @@
-import os, json
+import os
+import json
 from openai import OpenAI
 
-OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-5-mini")
-_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY", "sk-test-noop"))
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-VALUES_PROFILE = {
-    "non_negotiables": [
-        "honesty","integrity","respect","responsibility","authenticity","non-judgmental"
-    ],
-    "positives": [
-        "social impact","community wellbeing","accessibility","sustainable workloads",
-        "evidence-based","transparency","inclusion"
-    ]
-}
+def score_job(job: dict) -> dict:
+    """
+    Ask the LLM to score a job against user values and return structured JSON.
+    """
 
-SYSTEM_PROMPT = (
-    "You are an assistant that scores job ads against a candidate's values. "
-    "Be practical and concise. Output STRICT JSON that matches the schema."
-)
+    prompt = f"""
+You are JobScoutAI. Analyse this job and return structured JSON.
 
-def _build_user_prompt(job):
-    job_json = json.dumps(job, ensure_ascii=False)
-    values_json = json.dumps(VALUES_PROFILE, ensure_ascii=False)
-    return f"""Score the following job ad for values alignment.
-Return JSON with:
-{{
- "score_total": 0-5,
- "scores": {{"integrity":0-5,"impact":0-5,"culture":0-5,"fit":0-5,"health_safeguards":0-5}},
- "reasons": ["short bullets"],
- "red_flags": ["short bullets"],
- "must_ask": ["short interview questions to verify values"]
-}}
+Job:
+Title: {job.get("title")}
+Company: {job.get("company")}
+Location: {job.get("location")}
+Country: {job.get("country")}
+Remote: {job.get("remote")}
+Employment type: {job.get("employment_type")}
+Salary text: {job.get("salary_text")}
+Link: {job.get("link")}
+Description: {job.get("description")}
 
-Candidate values: {values_json}
-
-Job: {job_json}
+Return JSON with fields:
+- score_total (0–100)
+- reasons (list of strings: why it aligns with values)
+- red_flags (list of strings)
+- must_ask (list of interview questions)
 """
 
-def score_job(job):
     try:
-        rsp = _client.responses.create(
-            model=OPENAI_MODEL,
-            input=[
-                {"role":"system","content": SYSTEM_PROMPT},
-                {"role":"user","content": _build_user_prompt(job)}
-            ],
-            temperature=0.1,
-            max_output_tokens=350,
-            response_format={"type":"json_object"}
+        resp = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": prompt}],
+            response_format={"type": "json_object"}
         )
-        data = json.loads(rsp.output_text)
-        data.setdefault("score_total", 0)
-        data.setdefault("reasons", [])
-        data.setdefault("red_flags", [])
-        data.setdefault("must_ask", [])
-        return data
+        content = resp.choices[0].message.content
+        return json.loads(content)
+
     except Exception as e:
-        return {"score_total": 0, "reasons": [f"scorer_error: {e}"], "red_flags": [], "must_ask": []}
+        print(f"[scorer] error: {e}")
+        # Safe fallback so the pipeline doesn’t crash
+        return {
+            "score_total": 0,
+            "reasons": [f"scorer_error: {e}"],
+            "red_flags": [],
+            "must_ask": []
+        }
