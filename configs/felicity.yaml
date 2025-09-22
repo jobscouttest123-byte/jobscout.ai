@@ -1,4 +1,5 @@
 name: Felicity
+
 career_focus:
   - "UX design"
   - "Service design"
@@ -9,7 +10,8 @@ values:
   - "Wellbeing"
   - "Accessibility"
   - "Positive culture"
-  - "inclusion"
+  - "Sustainability"
+  - "Inclusion"
 
 exclude:
   - "commission-only"
@@ -18,6 +20,5 @@ exclude:
 
 results_per_day: 10
 
-  
 filters:
-  remote_only: false  # allow hybrid/ on-site as well
+  remote_only: false   # 👈 allow hybrid/on-site too
