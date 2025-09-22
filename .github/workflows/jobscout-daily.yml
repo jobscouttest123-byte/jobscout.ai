@@ -2,48 +2,45 @@ name: JobScout Daily
 
 on:
   schedule:
-    - cron: "0 23 * * *"   # Runs daily at 23:00 UTC 9am next day Melbourne (AEST)
-  workflow_dispatch: {}   # lets you run it manually
+    # 9:00 AM Melbourne
+    # AEST (UTC+10): 23:00 UTC previous day
+    # AEDT (UTC+11): 22:00 UTC previous day
+    - cron: '0 23 * * *'   # use 22 for AEDT, 23 for AEST
+  workflow_dispatch:
 
 jobs:
-  run-jobscout:
+  jobscout:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
+      - uses: actions/checkout@v3
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
           python-version: "3.11"
-
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Run JobScout
+        run: pip install -r requirements.txt
+      - name: Run daily JobScout
         env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GMAIL_USER: ${{ secrets.GMAIL_USER }}
           GMAIL_PASS: ${{ secrets.GMAIL_PASS }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
           ADZUNA_ID: ${{ secrets.ADZUNA_ID }}
           ADZUNA_KEY: ${{ secrets.ADZUNA_KEY }}
-        run: |
-          python daily_runner.py
-   test-scorer:
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v3
-        - name: Set up Python
-          uses: actions/setup-python@v4
-          with:
-            python-version: "3.11"
-        - name: Install dependencies
-          run: pip install -r requirements.txt
-        - name: Run scorer test
-          env:
-            OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          run: python test_scorer.py
+        run: python daily_runner.py
+
+  test-scorer:
+    # Only run the quick scorer test when triggered manually
+    if: ${{ github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run scorer smoke test
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: python test_scorer.py
