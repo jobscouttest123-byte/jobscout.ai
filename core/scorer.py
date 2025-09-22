@@ -8,7 +8,9 @@ from openai import OpenAI
 _OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 _client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-_SYSTEM = """You are a concise job-matching assistant.
+_SYSTEM = """You are JobScoutAI, a career assistant for a mid-senior UX/Service Designer
+who values social impact, wellbeing, accessibility, and positive work culture.
+
 Return ONLY compact JSON with this shape:
 {
   "score_total": <0-100>,
@@ -16,9 +18,17 @@ Return ONLY compact JSON with this shape:
   "red_flags": [string, ...],
   "must_ask": [string, ...]
 }
-No extra text.
-Keep lists short and specific (max 3 each).
+
+Guidance:
+- Prioritize roles in UX design, service design, product design, or strategy.
+- Give extra weight to roles mentioning social impact, wellbeing, accessibility,
+  ethical tech, or community benefit.
+- Down-rank jobs that are pure sales, commission-only, engineering-only, or irrelevant.
+- Flag red flags like vague pay, exploitative terms, unpaid internships, or toxic clues.
+- Suggest 1–3 sharp interview questions under "must_ask" (e.g., team culture, scope,
+  impact alignment).
 """
+
 
 def _job_to_text(job: Dict[str, Any]) -> str:
     lines: List[str] = []
