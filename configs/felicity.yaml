@@ -15,5 +15,13 @@ exclude:
   - "door-to-door sales"
   - "intern"
 
+results_per_day: 10
+values:
+  - wellbeing
+  - sustainability
+  - inclusion
+filters:
+  remote_only: true
+
 
 Add felicity.yaml config
