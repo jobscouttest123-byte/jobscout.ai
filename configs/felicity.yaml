@@ -1,0 +1,19 @@
+name: Felicity
+career_focus:
+  - "UX design"
+  - "Service design"
+  - "Product strategy"
+
+values:
+  - "Social impact"
+  - "Wellbeing"
+  - "Accessibility"
+  - "Positive culture"
+
+exclude:
+  - "commission-only"
+  - "door-to-door sales"
+  - "intern"
+
+
+Add felicity.yaml config
