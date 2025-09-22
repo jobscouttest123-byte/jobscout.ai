@@ -9,6 +9,7 @@ values:
   - "Wellbeing"
   - "Accessibility"
   - "Positive culture"
+  - "inclusion"
 
 exclude:
   - "commission-only"
@@ -16,12 +17,7 @@ exclude:
   - "intern"
 
 results_per_day: 10
-values:
-  - wellbeing
-  - sustainability
-  - inclusion
+
+  
 filters:
-  remote_only: true
-
-
-Add felicity.yaml config
+  remote_only: false  # allow hybrid/ on-site as well
