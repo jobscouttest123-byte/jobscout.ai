@@ -30,7 +30,6 @@ jobs:
           if [ "$HOUR" != "09" ]; then
             echo "skip=true" >> "$GITHUB_OUTPUT"
           fi
-
       - name: Skip run if not 9:00 Melbourne
         if: steps.timecheck.outputs.skip == 'true'
         run: echo "Not 9:00 in Melbourne — skipping." && exit 0
@@ -50,7 +49,3 @@ jobs:
           GMAIL_USER: ${{ secrets.GMAIL_USER }}
           GMAIL_PASS: ${{ secrets.GMAIL_PASS }}
         run: python daily_runner.py
-
-        env:
-  CONFIG_FILE: configs/felicity.yaml
-
