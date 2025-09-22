@@ -1,31 +1,52 @@
 name: JobScout Daily
 
 on:
+  # Run at 9:00 AM Melbourne every day (DST-safe: trigger at 22:00 & 23:00 UTC,
+  # then guard so it only proceeds when it's actually 09:00 in Melbourne)
   schedule:
-    # 9:00 AM Melbourne
-    # AEST (UTC+10): 23:00 UTC previous day
-    # AEDT (UTC+11): 22:00 UTC previous day
-    - cron: '0 23 * * *'   # use 22 for AEDT, 23 for AEST
+    - cron: "0 22 * * *"  # 9am AEDT (UTC+11)
+    - cron: "0 23 * * *"  # 9am AEST (UTC+10)
+  # Allow manual runs
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   jobscout:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      # Guard: only continue when it's 09:00 in Australia/Melbourne
+      - name: Ensure local time is 9:00 in Melbourne
+        id: timecheck
+        shell: bash
+        run: |
+          HOUR=$(TZ=Australia/Melbourne date +%H)
+          echo "Local Melbourne hour is $HOUR"
+          if [ "$HOUR" != "09" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Skip run if not 9:00 Melbourne
+        if: steps.timecheck.outputs.skip == 'true'
+        run: echo "Not 9:00 in Melbourne — skipping." && exit 0
+
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+
       - name: Install dependencies
         run: pip install -r requirements.txt
-      - name: Run daily JobScout
+
+      - name: Run JobScout
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}  # optional; can remove if unused
           GMAIL_USER: ${{ secrets.GMAIL_USER }}
           GMAIL_PASS: ${{ secrets.GMAIL_PASS }}
-          ADZUNA_ID: ${{ secrets.ADZUNA_ID }}
-          ADZUNA_KEY: ${{ secrets.ADZUNA_KEY }}
         run: python daily_runner.py
-
-  
