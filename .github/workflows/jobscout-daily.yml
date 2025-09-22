@@ -33,3 +33,17 @@ jobs:
           ADZUNA_KEY: ${{ secrets.ADZUNA_KEY }}
         run: |
           python daily_runner.py
+  test-scorer:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v3
+        - name: Set up Python
+          uses: actions/setup-python@v4
+          with:
+            python-version: "3.11"
+        - name: Install dependencies
+          run: pip install -r requirements.txt
+        - name: Run scorer test
+          env:
+            OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          run: python test_scorer.py
