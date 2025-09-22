@@ -8,9 +8,14 @@ from core.scorer import score_job
 from core.pick import pick_top
 from core.emailer import send_email
 
+import os
+
 def load_cfg():
-    with open("config.yaml") as f:
+    # Look for CONFIG_FILE env variable, fallback to config.yaml
+    config_file = os.getenv("CONFIG_FILE", "config.yaml")
+    with open(config_file) as f:
         return yaml.safe_load(f)
+
 
 def load_feeds():
     try:
