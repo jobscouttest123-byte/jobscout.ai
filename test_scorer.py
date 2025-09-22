@@ -1,4 +1,3 @@
-# test_scorer is disabled (kept only to satisfy old workflow references)
+# test_scorer disabled — placeholder only
 if __name__ == "__main__":
-    print("test_scorer.py: disabled")
-
+    print("test_scorer.py skipped (disabled).")
