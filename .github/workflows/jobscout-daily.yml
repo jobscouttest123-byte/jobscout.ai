@@ -1,12 +1,9 @@
 name: JobScout Daily
 
 on:
-  # Run at 9:00 AM Melbourne every day (DST-safe: trigger at 22:00 & 23:00 UTC,
-  # then guard so it only proceeds when it's actually 09:00 in Melbourne)
   schedule:
-    - cron: "0 22 * * *"  # 9am AEDT (UTC+11)
-    - cron: "0 23 * * *"  # 9am AEST (UTC+10)
-  # Allow manual runs
+    - cron: "0 22 * * *"
+    - cron: "0 23 * * *"
   workflow_dispatch:
 
 permissions:
@@ -20,7 +17,6 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      # Debug step to confirm config.yaml is being picked up correctly
       - name: Show config.yaml contents
         run: |
           echo "---- FILE CONTENT ----"
@@ -36,10 +32,4 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Run JobScout
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
-          GMAIL_USER: ${{ secrets.GMAIL_USER }}
-          GMAIL_PASS: ${{ secrets.GMAIL_PASS }}
-          CONFIG_FILE: configs/felicity.yaml
         run: python daily_runner.py
