@@ -20,6 +20,58 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      - name: Show config.yaml the runner sees
+        run: |
+          echo "---- FILE CONTENT ----"
+          cat config.yaml || true
+          echo
+          echo "---- PARSED YAML ----"
+          python - <<'PY'
+import yaml, sys, os
+with open("config.yaml","r", encoding="utf-8") as f:
+    txt = f.read()
+print(txt)
+try:
+    cfg = yaml.safe_load(txt) or {}
+    print("\nPARSED:", cfg)
+    print("\nTOP-LEVEL KEYS:", list(cfg.keys()))
+except Exception as e:
+    print("YAML parse error:", e)
+    sys.exit(1)
+PY
+
+      # Guard: only continue when it's 09:00 in Australia/Melbourne
+      - name: Ensure local time is 9:00 in Melbourne
+        id: timecheck
+        shell: bash
+        run: |
+          HOUR=$(TZ=Australia/Melbourne date +%H)
+          echo "Local Melbourne hour is $HOUR"
+          if [ "$HOUR" != "09" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Skip run if not 9:00 Melbourne
+        if: steps.timecheck.outputs.skip == 'true'
+        run: echo "Not 9:00 in Melbourne — skipping." && exit 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run JobScout
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_PASS: ${{ secrets.GMAIL_PASS }}
+          CONFIG_FILE: configs/felicity.yaml
+        run: python daily_runner.py
+
+      
       # Guard: only continue when it's 09:00 in Australia/Melbourne
       - name: Ensure local time is 9:00 in Melbourne
         id: timecheck
