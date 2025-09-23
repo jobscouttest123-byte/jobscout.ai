@@ -20,7 +20,7 @@ permissions:
         - name: Checkout repo
           uses: actions/checkout@v4
   
-         - name: Show config.yaml the runner sees
+        - name: Show config.yaml the runner sees
         run: |
           echo "---- FILE CONTENT ----"
           cat config.yaml || true
