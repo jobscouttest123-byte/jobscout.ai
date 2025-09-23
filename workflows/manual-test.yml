@@ -7,4 +7,4 @@ jobs:
   hello:
     runs-on: ubuntu-latest
     steps:
-      - run: echo "Hello, this is a test run"
+      - run: echo "Hello from manual run"
