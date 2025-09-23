@@ -1,3 +1,11 @@
+# --- who we send from/to & how to connect (uses your GMAIL_USER/GMAIL_PASS secrets for auth)
+email:
+  smtp_server: smtp.gmail.com
+  smtp_port: 587
+  from: jobscout.test123@gmail.com     # sender address to show in the email
+  to: jobscouttest123@gmail.com        # where the digest is delivered
+  use_tls: true
+
 testing: false  # set true if you later switch to a sandbox
 
 email:
@@ -15,5 +23,5 @@ salary_floor:
 
 allowed_types: ["full-time", "part-time", "contract", "casual"]
 allowed_countries: ["AU", "UK"]
-accept_remote: true
-results_per_day: 3
+accept_remote: false
+results_per_day: 10
