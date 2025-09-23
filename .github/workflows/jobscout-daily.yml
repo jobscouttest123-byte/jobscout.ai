@@ -12,15 +12,15 @@ on:
 permissions:
   contents: read
 
-jobs:
-  jobscout:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Show config.yaml the runner sees
+  jobs:
+    jobscout:
+      runs-on: ubuntu-latest
+  
+      steps:
+        - name: Checkout repo
+          uses: actions/checkout@v4
+  
+         - name: Show config.yaml the runner sees
         run: |
           echo "---- FILE CONTENT ----"
           cat config.yaml || true
