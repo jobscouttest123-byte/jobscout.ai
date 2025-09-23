@@ -27,18 +27,18 @@ jobs:
           echo
           echo "---- PARSED YAML ----"
           python - <<'PY'
-import yaml, sys, os
-with open("config.yaml","r", encoding="utf-8") as f:
-    txt = f.read()
-print(txt)
-try:
-    cfg = yaml.safe_load(txt) or {}
-    print("\nPARSED:", cfg)
-    print("\nTOP-LEVEL KEYS:", list(cfg.keys()))
-except Exception as e:
-    print("YAML parse error:", e)
-    sys.exit(1)
-PY
+          import yaml, sys, os
+          with open("config.yaml","r", encoding="utf-8") as f:
+              txt = f.read()
+          print(txt)
+          try:
+              cfg = yaml.safe_load(txt) or {}
+              print("\nPARSED:", cfg)
+              print("\nTOP-LEVEL KEYS:", list(cfg.keys()))
+          except Exception as e:
+              print("YAML parse error:", e)
+              sys.exit(1)
+          PY
 
       - name: Set up Python
         uses: actions/setup-python@v5
