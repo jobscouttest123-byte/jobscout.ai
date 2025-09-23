@@ -1,5 +1,13 @@
 name: Felicity
 
+# where to send the daily picks (auth uses GMAIL_USER/GMAIL_PASS secrets)
+email:
+  smtp_server: smtp.gmail.com
+  smtp_port: 587
+  from: jobscout.test123@gmail.com
+  to: jobscouttest123@gmail.com
+  use_tls: true
+
 career_focus:
   - "UX design"
   - "Service design"
@@ -22,8 +30,11 @@ results_per_day: 10
 
 filters:
   remote_only: false
+  allowed_types: ["full-time", "part-time", "contract", "casual", "temporary"]
+  allowed_countries: ["AU", "UK"]
 
-allowed_types:
-  - full-time
-  - part-time
-  - contract
+salary_floor:
+  au_yearly_gross: 65000
+  uk_yearly_gross: 31000
+  au_day_rate: 450
+  uk_day_rate: 250
