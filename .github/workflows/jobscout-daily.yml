@@ -12,13 +12,13 @@ on:
 permissions:
   contents: read
 
-  jobs:
-    jobscout:
-      runs-on: ubuntu-latest
-  
-      steps:
-        - name: Checkout repo
-          uses: actions/checkout@v4
+ jobs:
+  jobscout:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
   
         - name: Show config.yaml the runner sees
         run: |
