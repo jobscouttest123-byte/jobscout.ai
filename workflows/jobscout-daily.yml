@@ -1,13 +1,10 @@
 name: JobScout Daily
 
 on:
-  # Run at 9:00 AM Melbourne every day (DST-safe: trigger at 22:00 & 23:00 UTC,
-  # then guard so it only proceeds when it's actually 09:00 in Melbourne)
   schedule:
     - cron: "0 22 * * *"  # 9am AEDT (UTC+11)
     - cron: "0 23 * * *"  # 9am AEST (UTC+10)
-  # Allow manual runs
-  workflow_dispatch:
+  workflow_dispatch: {}  # <-- this line MUST be here for the button
 
 permissions:
   contents: read
@@ -15,24 +12,9 @@ permissions:
 jobs:
   jobscout:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-
-      # Guard: only continue when it's 09:00 in Australia/Melbourne
-      - name: Ensure local time is 9:00 in Melbourne
-        id: timecheck
-        shell: bash
-        run: |
-          HOUR=$(TZ=Australia/Melbourne date +%H)
-          echo "Local Melbourne hour is $HOUR"
-          if [ "$HOUR" != "09" ]; then
-            echo "skip=true" >> "$GITHUB_OUTPUT"
-          fi
-      - name: Skip run if not 9:00 Melbourne
-        if: steps.timecheck.outputs.skip == 'true'
-        run: echo "Not 9:00 in Melbourne — skipping." && exit 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -45,7 +27,7 @@ jobs:
       - name: Run JobScout
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}  # optional; can remove if unused
           GMAIL_USER: ${{ secrets.GMAIL_USER }}
           GMAIL_PASS: ${{ secrets.GMAIL_PASS }}
+          CONFIG_FILE: configs/felicity.yaml
         run: python daily_runner.py
