@@ -21,7 +21,7 @@ exclude:
 results_per_day: 10
 
 filters:
-  remote_only: false   # 👈 allow hybrid/on-site too
+  remote_only: false
 
 allowed_types:
   - full-time
