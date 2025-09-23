@@ -9,13 +9,12 @@ from core.pick import pick_top
 from core.emailer import send_email
 
 import os
+import yaml
 
 def load_cfg():
-    # Look for CONFIG_FILE env variable, fallback to config.yaml
-    config_file = os.getenv("CONFIG_FILE", "config.yaml")
-    with open(config_file) as f:
-        return yaml.safe_load(f)
-
+    path = os.getenv("CONFIG_FILE", "config.yaml")
+    with open(path, "r", encoding="utf-8") as f:
+        return yaml.safe_load(f) or {}
 
 def load_feeds():
     try:
