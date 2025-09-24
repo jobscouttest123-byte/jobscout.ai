@@ -1,40 +1,44 @@
-def normalize(job, source):
-    if source == "remotive":
-        loc = (job or {}).get("candidate_required_location") or ""
-        return {
-            "source": "remotive",
-            "title": job.get("title"),
-            "company": job.get("company_name"),
-            "location": loc,
-            "country": "Remote",
-            "remote": True,
-            "employment_type": (job.get("job_type") or "").lower(),
-            "salary_text": job.get("salary"),
-            "salary_min": None,
-            "salary_max": None,
-            "currency": None,
-            "link": job.get("url"),
-            "description": job.get("description"),
-            "posted_at": job.get("publication_date")
-        }
-    elif source == "adzuna":
-        area = job.get("location", {}).get("area", [])
-        country = (area[0] if area else "").upper()
-        return {
-            "source": "adzuna",
-            "title": job.get("title"),
-            "company": job.get("company", {}).get("display_name"),
-            "location": job.get("location", {}).get("display_name"),
-            "country": country,
-            "remote": "remote" in (job.get("description","").lower()),
-            "employment_type": (job.get("contract_type") or "").lower(),
-            "salary_text": None,
-            "salary_min": job.get("salary_min"),
-            "salary_max": job.get("salary_max"),
-            "currency": job.get("salary_currency"),
-            "link": job.get("redirect_url"),
-            "description": job.get("description"),
-            "posted_at": job.get("created")
-        }
-    else:
-        return None
+# core/normalize.py
+
+def _bool_remote(v):
+    # Normalize various remote flags/strings to bool
+    if isinstance(v, bool):
+        return v
+    if v is None:
+        return True  # assume remote if missing (safe default for your use case)
+    s = str(v).strip().lower()
+    return s in {"true", "yes", "y", "1", "remote", "fully remote", "anywhere"}
+
+def normalize(job: dict, source: str) -> dict:
+    """
+    Return a unified job dict with safe defaults so the email never shows 'None'.
+    Fields your pipeline expects:
+      title, company, location, link, source, remote, value_match, red_flags, questions
+    """
+    job = job or {}
+
+    # Common incoming keys to map from (rss/remotive/adzuna etc.)
+    title = job.get("title") or job.get("position") or job.get("role") or ""
+    company = job.get("company") or job.get("organization") or job.get("employer") or "Unknown"
+    location = job.get("location") or job.get("city") or job.get("region") or "Remote"
+
+    # Some sources use 'url', others 'link'
+    link = job.get("link") or job.get("url") or job.get("href") or ""
+
+    # Normalize remote to a bool
+    remote = _bool_remote(job.get("remote"))
+
+    return {
+        "title": title.strip() or "Unspecified role",
+        "company": company.strip() or "Unknown",
+        "location": location.strip() or "Remote",
+        "link": link,
+        "source": (source or "unknown").strip(),
+        "remote": remote,
+        # Optional enriched fields (may be added by scorer)
+        "value_match": job.get("value_match", ""),
+        "red_flags": job.get("red_flags", ""),
+        "questions": job.get("questions", ""),
+        # Keep original for debugging (optional)
+        "_raw": job,
+    }
