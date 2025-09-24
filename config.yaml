@@ -1,28 +1,47 @@
 # --- who we send from/to & how to connect (uses your GMAIL_USER/GMAIL_PASS secrets for auth)
-# ======================
-# JobScout main settings
-# ======================
+# ===============================
+# JobScoutAI main configuration
+# ===============================
 
-# Email delivery (auth uses GitHub Secrets GMAIL_USER / GMAIL_PASS)
+# -------------------------
+# Email settings
+# -------------------------
+# NOTE: actual authentication uses GitHub Secrets:
+#   GMAIL_USER / GMAIL_PASS
 email:
   smtp_server: smtp.gmail.com
   smtp_port: 587
-  from: jobscout.test123@gmail.com       # sender shown in the email
-  to: jobscouttest123@gmail.com          # recipient of the digest
+  from: jobscout.test123@gmail.com
+  to: jobscouttest123@gmail.com
   use_tls: true
 
-# How many results to email each day
+# -------------------------
+# Job limits
+# -------------------------
 results_per_day: 10
 
-# Minimum pay thresholds (used by filters/scorer as applicable)
+# -------------------------
+# Filters (safe defaults)
+# -------------------------
+filters:
+  remote_only: false
+
+allowed_types:
+  - full-time
+  - part-time
+  - contract
+  - casual
+  - temporary
+
+allowed_countries:
+  - AU
+  - UK
+
+# -------------------------
+# Salary floors
+# -------------------------
 salary_floor:
   au_yearly_gross: 65000
   uk_yearly_gross: 31000
   au_day_rate: 450
   uk_day_rate: 250
-
-# All filtering options live under this node
-filters:
-  remote_only: true
-  allowed_types: ["full-time", "part-time", "contract", "casual", "temporary"]
-  allowed_countries: ["AU", "UK"]
