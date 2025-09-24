@@ -68,15 +68,15 @@ def collect_all(cfg):
         except Exception as e:
             print(f"[collect] rss {label} failed: {e}")
 
-    # Normalize
+    # Normalize EVERYTHING to the same schema
     jobs = []
     for j, s in raw:
-        if s in ("remotive", "adzuna"):
+        try:
             jj = normalize(j, s)
             if jj:
                 jobs.append(jj)
-        else:
-            jobs.append(j)
+        except Exception as e:
+            print(f"[normalize] {s} failed: {e}")
     return jobs
 
 # ---------------------------
