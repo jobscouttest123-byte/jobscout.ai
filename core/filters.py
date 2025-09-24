@@ -1,31 +1,27 @@
-def _meets_salary_floor(job, cfg):
-    et = (job.get("employment_type") or "").lower()
-    if "contract" in et and (job.get("salary_min") or job.get("salary_max")):
-        return True
-    if job.get("country") == "AU" and job.get("salary_min"):
-        return job["salary_min"] >= cfg["salary_floor"]["au_yearly_gross"]
-    if job.get("country") == "UK" and job.get("salary_min"):
-        return job["salary_min"] >= cfg["salary_floor"]["uk_yearly_gross"]
-    return True
-
 def _type_ok(job, cfg):
     et = (job.get("employment_type") or "").lower()
-    return (not et) or any(et == t.lower() for t in cfg["allowed_types"])
+    allowed = [t.lower() for t in (cfg.get("allowed_types") or [])]
+    # If no allowed_types configured, don't block on type
+    return (not allowed) or (et == "" or et in allowed)
 
-def _geo_ok(job, cfg):
-    if job.get("remote") and cfg.get("accept_remote", True):
-        return True
-    c = job.get("country")
-    return (not c) or (c in cfg.get("allowed_countries", []))
+def _country_ok(job, cfg):
+    country = (job.get("country") or "").upper()
+    allowed = [c.upper() for c in (cfg.get("allowed_countries") or [])]
+    # If no allowed_countries configured, don't block on country
+    return (not allowed) or (country == "" or country in allowed)
 
 def filter_jobs(jobs, cfg):
+    cfg = cfg or {}
+    fcfg = (cfg.get("filters") or {})
+    remote_only = bool(fcfg.get("remote_only", False))
+
     out = []
-    for j in jobs:
-        if not _geo_ok(j, cfg): 
+    for j in jobs or []:
+        if remote_only and not j.get("remote", False):
             continue
         if not _type_ok(j, cfg):
             continue
-        if not _meets_salary_floor(j, cfg):
+        if not _country_ok(j, cfg):
             continue
         out.append(j)
     return out
