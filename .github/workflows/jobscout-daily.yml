@@ -55,6 +55,12 @@ jobs:
 
       - name: Install dependencies
         run: pip install -r requirements.txt
+        
+      - name: Syntax check all Python
+        run: |
+          python -m py_compile daily_runner.py
+          python -m py_compile core/*.py
+          python -m py_compile collectors/*.py
 
       - name: Run JobScout
         env:
