@@ -1,13 +1,8 @@
-# --- who we send from/to & how to connect (uses your GMAIL_USER/GMAIL_PASS secrets for auth)
 # ===============================
 # JobScoutAI main configuration
 # ===============================
 
-# -------------------------
-# Email settings
-# -------------------------
-# NOTE: actual authentication uses GitHub Secrets:
-#   GMAIL_USER / GMAIL_PASS
+# Email settings (auth comes from GitHub Secrets GMAIL_USER / GMAIL_PASS)
 email:
   smtp_server: smtp.gmail.com
   smtp_port: 587
@@ -15,17 +10,14 @@ email:
   to: jobscouttest123@gmail.com
   use_tls: true
 
-# -------------------------
-# Job limits
-# -------------------------
+# How many jobs to include in the email
 results_per_day: 10
 
-# -------------------------
-# Filters (safe defaults)
-# -------------------------
+# Filters
 filters:
   remote_only: false
 
+# These must be TOP-LEVEL (used by filters.py)
 allowed_types:
   - full-time
   - part-time
@@ -37,9 +29,7 @@ allowed_countries:
   - AU
   - UK
 
-# -------------------------
-# Salary floors
-# -------------------------
+# Salary floors (optional)
 salary_floor:
   au_yearly_gross: 65000
   uk_yearly_gross: 31000
