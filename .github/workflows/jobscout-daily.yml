@@ -55,6 +55,11 @@ jobs:
 
       - name: Install dependencies
         run: pip install -r requirements.txt
+
+      - name: Show daily_runner.py head/tail
+        run: |
+          echo "---- HEAD ----"; sed -n '1,80p' daily_runner.py
+          echo "---- TAIL ----"; tail -n 40 daily_runner.py
         
       - name: Syntax check all Python
         run: |
