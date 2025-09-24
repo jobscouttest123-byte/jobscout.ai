@@ -1,13 +1,11 @@
 def _type_ok(job, cfg):
     et = (job.get("employment_type") or "").lower()
     allowed = [t.lower() for t in (cfg.get("allowed_types") or [])]
-    # If no allowed_types configured, don't block on type
     return (not allowed) or (et == "" or et in allowed)
 
 def _country_ok(job, cfg):
     country = (job.get("country") or "").upper()
     allowed = [c.upper() for c in (cfg.get("allowed_countries") or [])]
-    # If no allowed_countries configured, don't block on country
     return (not allowed) or (country == "" or country in allowed)
 
 def filter_jobs(jobs, cfg):
