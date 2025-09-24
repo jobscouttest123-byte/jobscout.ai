@@ -1,31 +1,22 @@
-import os, smtplib
-from email.mime.text import MIMEText
+# core/emailer.py
+import smtplib
+from email.message import EmailMessage
 
 def send_email(cfg, subject, body):
-    cfg = cfg or {}
-    eml = cfg.get("email", {})  # tolerate missing
+    ecfg = cfg.get("email") or {}
+    missing = [k for k in ["smtp_server", "smtp_port", "from", "to"] if k not in ecfg]
+    if missing:
+        raise ValueError(f"Email config missing keys: {missing}")
 
-    smtp_server = eml.get("smtp_server", "smtp.gmail.com")
-    smtp_port   = int(eml.get("smtp_port", 587))
-    use_tls     = bool(eml.get("use_tls", True))
-
-    from_addr = eml.get("from") or os.getenv("GMAIL_USER")
-    to_addr   = eml.get("to")   or os.getenv("GMAIL_TO") or os.getenv("GMAIL_USER")
-    if not from_addr or not to_addr:
-        raise RuntimeError("Missing from/to. Add config.email or set GMAIL_USER and (optionally) GMAIL_TO secrets.")
-
-    msg = MIMEText(body, "plain", "utf-8")
+    msg = EmailMessage()
     msg["Subject"] = subject
-    msg["From"] = from_addr
-    msg["To"] = to_addr
+    msg["From"] = ecfg["from"]
+    msg["To"] = ecfg["to"]
+    msg.set_content(body)
 
-    username = os.getenv("GMAIL_USER")
-    password = os.getenv("GMAIL_PASS")
-    if not (username and password):
-        raise RuntimeError("Missing GMAIL_USER/GMAIL_PASS secrets for SMTP auth.")
-
-    with smtplib.SMTP(smtp_server, smtp_port, timeout=30) as s:
-        if use_tls:
-            s.starttls()
-        s.login(username, password)
-        s.send_message(msg)
+    server = smtplib.SMTP(ecfg["smtp_server"], int(ecfg["smtp_port"]))
+    if ecfg.get("use_tls", True):
+        server.starttls()
+    server.login(cfg.get("GMAIL_USER", ""), cfg.get("GMAIL_PASS", ""))
+    server.send_message(msg)
+    server.quit()
