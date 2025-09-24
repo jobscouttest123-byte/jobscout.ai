@@ -1,85 +1,42 @@
 name: JobScout Daily
 
 on:
-  # Daily at 9:00 AM Melbourne (handles AEST/AEDT via two UTC crons)
   schedule:
-    - cron: "0 22 * * *"  # 9am AEDT (UTC+11)
-    - cron: "0 23 * * *"  # 9am AEST (UTC+10)
-  # Allow manual runs
+    - cron: "0 22 * * *"  # pick ONE of these; 9am Melbourne depending on DST
   workflow_dispatch:
 
 concurrency:
   group: jobscout-daily
   cancel-in-progress: true
-  
+
 permissions:
   contents: read
 
 jobs:
   jobscout:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
-
-      # Minimal visibility so we know what the runner is using
-      - name: Show repo state (config + filters)
-        run: |
-          echo "Commit: $(git rev-parse HEAD)"
-          echo "CONFIG_FILE=$CONFIG_FILE"
-          echo "---- core/filters.py ----"
-          sed -n '1,160p' core/filters.py || true
-          echo
-          echo "---- configs/felicity.yaml ----"
-          sed -n '1,200p' configs/felicity.yaml || true
-          echo
-          echo "---- config.yaml ----"
-          sed -n '1,200p' config.yaml || true
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - name: Show repo state (config + filters)
-        run: |
-          echo "Commit: $(git rev-parse HEAD)"
-          echo "---- core/filters.py ----"
-          sed -n '1,200p' core/filters.py || true
-          echo
-          echo "---- grep for cfg[\"allowed_types\"] ----"
-          grep -Rn 'cfg\["allowed_types"\]' core || true
-          echo
-          echo "CONFIG_FILE=$CONFIG_FILE"
-          echo "---- configs/felicity.yaml ----"
-          sed -n '1,200p' configs/felicity.yaml || true
-          echo "---- config.yaml ----"
-          sed -n '1,200p' config.yaml || true
-
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Show daily_runner.py head/tail
-        run: |
-          echo "---- HEAD ----"; sed -n '1,80p' daily_runner.py
-          echo "---- TAIL ----"; tail -n 40 daily_runner.py
-        
       - name: Syntax check all Python
         run: |
           python -m py_compile daily_runner.py
           python -m py_compile core/*.py
           python -m py_compile collectors/*.py
 
-      - name: Debug SMTP env (masked)
-        run: |
-          echo "GMAIL_USER is set? " && [ -z "${GMAIL_USER}" ] && echo "NO" || echo "YES"
-          echo "CONFIG_FILE=${CONFIG_FILE:-config.yaml}"
-
       - name: Run JobScout
         env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}   # optional
-          GMAIL_USER:      ${{ secrets.GMAIL_USER }}
-          GMAIL_PASS:      ${{ secrets.GMAIL_PASS }}
-          CONFIG_FILE:     config.yaml
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_PASS: ${{ secrets.GMAIL_PASS }}
+          CONFIG_FILE: config.yaml
         run: python daily_runner.py
