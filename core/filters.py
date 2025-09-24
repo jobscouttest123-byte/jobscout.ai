@@ -2,30 +2,47 @@
 from datetime import datetime, timezone, timedelta
 
 def _parse_date(dt):
+    """
+    Parse many date formats and ALWAYS return a timezone-aware (UTC) datetime.
+    Returns None when unparsable.
+    """
     if not dt:
         return None
     if isinstance(dt, datetime):
+        # force aware (UTC) if naive
         return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
+
     s = str(dt).strip()
     try:
-        # ISO 8601 with optional Z
+        # Handle trailing Z (UTC)
         if s.endswith("Z"):
             s = s[:-1] + "+00:00"
-        return datetime.fromisoformat(s)
+        d = datetime.fromisoformat(s)
+        # force aware (UTC) if naive
+        return d if d.tzinfo else d.replace(tzinfo=timezone.utc)
     except Exception:
-        for fmt in ("%Y-%m-%d", "%Y/%m/%d", "%Y-%m-%d %H:%M:%S"):
-            try:
-                return datetime.strptime(s, fmt).replace(tzinfo=timezone.utc)
-            except Exception:
-                pass
+        pass
+
+    # Common fallbacks (force UTC tzinfo)
+    for fmt in ("%Y-%m-%d",
+                "%Y/%m/%d",
+                "%d-%m-%Y",
+                "%Y-%m-%d %H:%M:%S",
+                "%Y/%m/%d %H:%M:%S"):
+        try:
+            return datetime.strptime(s, fmt).replace(tzinfo=timezone.utc)
+        except Exception:
+            continue
+
     return None
 
 def _recent_ok(job, cfg):
     days = (cfg.get("filters") or {}).get("recent_days")
     if not days:
-        return True
+        return True  # no recency constraint
     cutoff = datetime.now(timezone.utc) - timedelta(days=int(days))
     dt = _parse_date(job.get("posted_at"))
+    # Exclude if unparsable (to honor "last N days" strictly)
     return (dt is not None) and (dt >= cutoff)
 
 def _type_ok(job, cfg):
