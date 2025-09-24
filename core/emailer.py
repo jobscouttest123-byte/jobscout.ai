@@ -1,21 +1,18 @@
-# core/emailer.py
 import os, smtplib
 from email.mime.text import MIMEText
 
 def send_email(cfg, subject, body):
     cfg = cfg or {}
-    eml = cfg.get("email", {})  # tolerate missing 'email' block
+    eml = cfg.get("email", {})  # tolerate missing
 
     smtp_server = eml.get("smtp_server", "smtp.gmail.com")
     smtp_port   = int(eml.get("smtp_port", 587))
     use_tls     = bool(eml.get("use_tls", True))
 
-    # prefer config; fall back to secrets
     from_addr = eml.get("from") or os.getenv("GMAIL_USER")
     to_addr   = eml.get("to")   or os.getenv("GMAIL_TO") or os.getenv("GMAIL_USER")
-
     if not from_addr or not to_addr:
-        raise RuntimeError("Missing email from/to. Add config.email or set GMAIL_USER and (optionally) GMAIL_TO secrets.")
+        raise RuntimeError("Missing from/to. Add config.email or set GMAIL_USER and (optionally) GMAIL_TO secrets.")
 
     msg = MIMEText(body, "plain", "utf-8")
     msg["Subject"] = subject
