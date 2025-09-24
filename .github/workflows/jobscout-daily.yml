@@ -67,6 +67,11 @@ jobs:
           python -m py_compile core/*.py
           python -m py_compile collectors/*.py
 
+      - name: Debug SMTP env (masked)
+        run: |
+          echo "GMAIL_USER is set? " && [ -z "${GMAIL_USER}" ] && echo "NO" || echo "YES"
+          echo "CONFIG_FILE=${CONFIG_FILE:-config.yaml}"
+
       - name: Run JobScout
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}   # optional
