@@ -2,7 +2,7 @@
 # JobScoutAI main configuration
 # ===============================
 
-# Email settings (auth comes from GitHub Secrets GMAIL_USER / GMAIL_PASS)
+# Email settings (auth via secrets GMAIL_USER / GMAIL_PASS)
 email:
   smtp_server: smtp.gmail.com
   smtp_port: 587
@@ -10,14 +10,14 @@ email:
   to: jobscouttest123@gmail.com
   use_tls: true
 
-# How many jobs to include in the email
+# How many jobs to include in the daily digest
 results_per_day: 10
 
 # Filters
 filters:
   remote_only: false
 
-# These must be TOP-LEVEL (used by filters.py)
+# These are required at TOP LEVEL by the filters code
 allowed_types:
   - full-time
   - part-time
