@@ -8,13 +8,12 @@ def _parse_date(dt):
         return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
     s = str(dt).strip()
     try:
-        # ISO with Z
+        # ISO 8601 with optional Z
         if s.endswith("Z"):
             s = s[:-1] + "+00:00"
         return datetime.fromisoformat(s)
     except Exception:
-        # Try common formats
-        for fmt in ("%Y-%m-%d", "%Y/%m/%d", "%d-%m-%Y", "%Y-%m-%d %H:%M:%S"):
+        for fmt in ("%Y-%m-%d", "%Y/%m/%d", "%Y-%m-%d %H:%M:%S"):
             try:
                 return datetime.strptime(s, fmt).replace(tzinfo=timezone.utc)
             except Exception:
@@ -24,11 +23,9 @@ def _parse_date(dt):
 def _recent_ok(job, cfg):
     days = (cfg.get("filters") or {}).get("recent_days")
     if not days:
-        return True  # no recency constraint
+        return True
     cutoff = datetime.now(timezone.utc) - timedelta(days=int(days))
-    posted = job.get("posted_at")
-    dt = _parse_date(posted)
-    # If we can’t parse a date, exclude to honor “last 7 days”
+    dt = _parse_date(job.get("posted_at"))
     return (dt is not None) and (dt >= cutoff)
 
 def _type_ok(job, cfg):
@@ -42,12 +39,10 @@ def _country_ok(job, cfg):
     return (not allowed) or (country == "" or country in allowed)
 
 def _remote_ok(job, cfg):
-    # When remote_only is False, we allow remote/hybrid/onsite
-    f = (cfg.get("filters") or {})
-    remote_only = bool(f.get("remote_only", False))
+    # If remote_only is False, allow all (remote, hybrid, onsite)
+    remote_only = bool((cfg.get("filters") or {}).get("remote_only", False))
     if not remote_only:
         return True
-    # If remote_only is True, accept jobs explicitly flagged remote
     return bool(job.get("remote", False))
 
 def filter_jobs(jobs, cfg):
@@ -63,6 +58,5 @@ def filter_jobs(jobs, cfg):
         if not _recent_ok(j, cfg):
             continue
         out.append(j)
-
     print(f"[filters] {len(out)}/{len(jobs or [])} jobs kept after filtering")
     return out
