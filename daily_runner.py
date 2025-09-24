@@ -56,7 +56,7 @@ def collect_all(cfg):
         except Exception as e:
             print(f"[collect] adzuna({code}) failed: {e}")
 
-    # RSS feeds
+    # RSS feeds (optional)
     for feed in load_feeds():
         url = (feed or {}).get("url")
         label = (feed or {}).get("label", "rss")
@@ -78,6 +78,7 @@ def collect_all(cfg):
         except Exception as e:
             print(f"[normalize] {s} failed: {e}")
     return jobs
+
 
 # ---------------------------
 # Main pipeline
