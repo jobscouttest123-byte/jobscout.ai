@@ -79,19 +79,24 @@ def collect_all(cfg):
             print(f"[normalize] {s} failed: {e}")
     return jobs
 
-
 # ---------------------------
 # Main pipeline
 # ---------------------------
 def main():
     cfg = load_cfg()
 
-    jobs = collect_all(cfg)
-    jobs = filter_jobs(jobs, cfg)
+    # 1) Collect all jobs
+    collected = collect_all(cfg)
+    total_collected = len(collected)
 
-    # Cap scored jobs to control cost/time
+    # 2) Apply filters
+    jobs = filter_jobs(collected, cfg)
+    kept_after_filters = len(jobs)
+
+    # 3) Cap scored jobs to control cost/time
     jobs = (jobs or [])[:25]
 
+    # 4) Score
     for j in jobs:
         try:
             s = score_job(j) or {}
@@ -103,9 +108,21 @@ def main():
         j["red_flags"] = s.get("red_flags", [])
         j["must_ask"] = s.get("must_ask", [])
 
-    picks = pick_top(jobs, cfg.get("results_per_day", 3)) or []
+    # 5) Pick top N
+    results_per_day = cfg.get("results_per_day", 3)
+    picks = pick_top(jobs, results_per_day) or []
+    picked_count = len(picks)
 
-    lines = ["Top picks for today:\n"]
+    # 6) Build email
+    header = [
+        "Top picks for today:",
+        f"- Collected: {total_collected}",
+        f"- Matched filters: {kept_after_filters}",
+        f"- Included in this email (top {results_per_day}): {picked_count}",
+        ""
+    ]
+
+    lines = []
     if not picks:
         lines.append("No jobs found today.")
     else:
@@ -125,9 +142,9 @@ def main():
                 lines.append("Questions to ask: " + "; ".join(p["must_ask"]))
             lines.append("")
 
+    body = "\n".join(header + lines)
 
-    body = "\n".join(lines)
-
+    # 7) Send
     send_email(cfg, "JobScoutAI — Daily Top Picks", body)
 
 
