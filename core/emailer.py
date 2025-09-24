@@ -1,22 +1,35 @@
 # core/emailer.py
+import os
 import smtplib
-from email.message import EmailMessage
+from email.mime.text import MIMEText
 
 def send_email(cfg, subject, body):
-    ecfg = cfg.get("email") or {}
-    missing = [k for k in ["smtp_server", "smtp_port", "from", "to"] if k not in ecfg]
-    if missing:
-        raise ValueError(f"Email config missing keys: {missing}")
+    cfg = cfg or {}
+    eml = cfg.get("email", {})  # yaml section for from/to/host/port/tls
 
-    msg = EmailMessage()
+    smtp_server = eml.get("smtp_server", "smtp.gmail.com")
+    smtp_port   = int(eml.get("smtp_port", 587))
+    use_tls     = bool(eml.get("use_tls", True))
+
+    # Always send from the authenticated Gmail to avoid Gmail rejections
+    from_addr = eml.get("from") or os.getenv("GMAIL_USER")
+    to_addr   = eml.get("to")   or os.getenv("GMAIL_TO") or os.getenv("GMAIL_USER")
+    if not from_addr or not to_addr:
+        raise RuntimeError("Missing from/to: set config.email.from/to or GMAIL_USER/GMAIL_TO secrets.")
+
+    msg = MIMEText(body, "plain", "utf-8")
     msg["Subject"] = subject
-    msg["From"] = ecfg["from"]
-    msg["To"] = ecfg["to"]
-    msg.set_content(body)
+    msg["From"] = from_addr
+    msg["To"] = to_addr
 
-    server = smtplib.SMTP(ecfg["smtp_server"], int(ecfg["smtp_port"]))
-    if ecfg.get("use_tls", True):
-        server.starttls()
-    server.login(cfg.get("GMAIL_USER", ""), cfg.get("GMAIL_PASS", ""))
-    server.send_message(msg)
-    server.quit()
+    # *** Use GitHub Secrets (environment) for auth, not YAML ***
+    username = os.getenv("GMAIL_USER")
+    password = os.getenv("GMAIL_PASS")
+    if not username or not password:
+        raise RuntimeError("Missing GMAIL_USER or GMAIL_PASS secrets.")
+
+    with smtplib.SMTP(smtp_server, smtp_port, timeout=30) as s:
+        if use_tls:
+            s.starttls()
+        s.login(username, password)
+        s.send_message(msg)
