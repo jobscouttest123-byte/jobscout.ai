@@ -46,5 +46,5 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}   # optional
           GMAIL_USER:      ${{ secrets.GMAIL_USER }}
           GMAIL_PASS:      ${{ secrets.GMAIL_PASS }}
-          CONFIG_FILE:     configs/felicity.yaml
+          CONFIG_FILE:     config.yaml
         run: python daily_runner.py
