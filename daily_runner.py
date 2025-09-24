@@ -8,8 +8,7 @@ from core.scorer import score_job
 from core.pick import pick_top
 from core.emailer import send_email
 
-import os
-import yaml
+import os, yaml
 
 def load_cfg():
     path = os.getenv("CONFIG_FILE", "config.yaml")
