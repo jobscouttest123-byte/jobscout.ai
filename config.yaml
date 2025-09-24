@@ -13,21 +13,10 @@ email:
 # How many jobs to include in the daily digest
 results_per_day: 10
 
-# Filters
-filters:
-  remote_only: false
+# Global allowances (optional; code will handle missing)
+allowed_types: ["full-time", "part-time", "contract", "casual"]
+allowed_countries: ["AU", "UK"]
 
-# These are required at TOP LEVEL by the filters code
-allowed_types:
-  - full-time
-  - part-time
-  - contract
-  - casual
-  - temporary
-
-allowed_countries:
-  - AU
-  - UK
 
 # Salary floors (optional)
 salary_floor:
