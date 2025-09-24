@@ -17,6 +17,9 @@ results_per_day: 10
 allowed_types: ["full-time", "part-time", "contract", "casual"]
 allowed_countries: ["AU", "UK"]
 
+filters:
+  remote_only: false      # include onsite + hybrid + remote
+  recent_days: 7          # only jobs posted within last 7 days
 
 # Salary floors (optional)
 salary_floor:
