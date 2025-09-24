@@ -105,7 +105,7 @@ def main():
 
     picks = pick_top(jobs, cfg.get("results_per_day", 3)) or []
 
-       lines = ["Top picks for today:\n"]
+    lines = ["Top picks for today:\n"]
     if not picks:
         lines.append("No jobs found today.")
     else:
