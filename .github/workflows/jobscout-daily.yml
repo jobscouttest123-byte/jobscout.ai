@@ -1,10 +1,12 @@
 name: JobScout Daily
 
 on:
-  workflow_dispatch: {}   # enables the “Run workflow” button
+  # Run at 9:00 AM Melbourne every day (DST-safe: trigger at 22:00 & 23:00 UTC)
   schedule:
     - cron: "0 22 * * *"  # 9am AEDT (UTC+11)
     - cron: "0 23 * * *"  # 9am AEST (UTC+10)
+  # Allow manual runs
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -12,9 +14,26 @@ permissions:
 jobs:
   jobscout:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+
+      # Debug step to confirm what config + filters are in the runner
+      - name: Show repo state (config + filters)
+        run: |
+          echo "Commit: $(git rev-parse HEAD)"
+          echo "---- core/filters.py ----"
+          sed -n '1,120p' core/filters.py || true
+          echo
+          echo "---- grep for cfg[\"allowed_types\"] ----"
+          grep -Rn 'cfg\["allowed_types"\]' core || true
+          echo
+          echo "CONFIG_FILE=$CONFIG_FILE"
+          echo "---- configs/felicity.yaml ----"
+          sed -n '1,200p' configs/felicity.yaml || true
+          echo "---- config.yaml ----"
+          sed -n '1,200p' config.yaml || true
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -24,15 +43,10 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Show config file being used
-        run: |
-          echo "CONFIG_FILE=$CONFIG_FILE"
-          echo "----- file content -----"
-          cat "${CONFIG_FILE:-config.yaml}" || true
-
       - name: Run JobScout
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          OPENAI_MODEL: ${{ secrets.OPENAI_MODEL }}
           GMAIL_USER: ${{ secrets.GMAIL_USER }}
           GMAIL_PASS: ${{ secrets.GMAIL_PASS }}
           CONFIG_FILE: configs/felicity.yaml
