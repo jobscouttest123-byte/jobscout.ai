@@ -63,4 +63,6 @@ def filter_jobs(jobs, cfg):
         if not _recent_ok(j, cfg):
             continue
         out.append(j)
+
+    print(f"[filters] {len(out)}/{len(jobs or [])} jobs kept after filtering")
     return out
