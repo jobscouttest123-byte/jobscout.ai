@@ -1,6 +1,6 @@
 name: Felicity
 
-# where to send the daily picks (auth uses GMAIL_USER/GMAIL_PASS secrets)
+# Email settings (auth uses GitHub Secrets: GMAIL_USER / GMAIL_PASS)
 email:
   smtp_server: smtp.gmail.com
   smtp_port: 587
@@ -8,6 +8,10 @@ email:
   to: jobscouttest123@gmail.com
   use_tls: true
 
+# How many jobs to email daily
+results_per_day: 10
+
+# Your focus & values
 career_focus:
   - "UX design"
   - "Service design"
@@ -21,20 +25,32 @@ values:
   - "Sustainability"
   - "Inclusion"
 
+# Exclusions
 exclude:
   - "commission-only"
   - "door-to-door sales"
   - "intern"
 
-results_per_day: 10
-
+# Filters (SAFE defaults)
 filters:
   remote_only: false
-  allowed_types: ["full-time", "part-time", "contract", "casual", "temporary"]
-  allowed_countries: ["AU", "UK"]
 
+# These two are required by your current filters logic — keep them top-level
+allowed_types:
+  - full-time
+  - part-time
+  - contract
+  - casual
+  - temporary
+
+allowed_countries:
+  - AU
+  - UK
+
+# Optional salary floors (adjust if you use them later)
 salary_floor:
   au_yearly_gross: 65000
   uk_yearly_gross: 31000
   au_day_rate: 450
   uk_day_rate: 250
+
