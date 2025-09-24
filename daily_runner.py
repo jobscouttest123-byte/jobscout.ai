@@ -10,9 +10,6 @@ from core.scorer import score_job
 from core.pick import pick_top
 from core.emailer import send_email
 
-# ---------------------------
-# Config loader (respects CONFIG_FILE; falls back to config.yaml)
-# ---------------------------
 def load_cfg():
     path = os.getenv("CONFIG_FILE", "config.yaml")
     if not os.path.exists(path):
@@ -20,9 +17,6 @@ def load_cfg():
     with open(path, "r", encoding="utf-8") as f:
         return yaml.safe_load(f) or {}
 
-# ---------------------------
-# Load extra feeds if any (optional)
-# ---------------------------
 def load_feeds():
     try:
         with open("feeds.yaml", "r", encoding="utf-8") as f:
@@ -31,9 +25,6 @@ def load_feeds():
     except FileNotFoundError:
         return []
 
-# ---------------------------
-# Collect jobs from configured sources
-# ---------------------------
 def collect_all(cfg):
     raw = []
 
@@ -68,7 +59,7 @@ def collect_all(cfg):
         except Exception as e:
             print(f"[collect] rss {label} failed: {e}")
 
-    # Normalize EVERYTHING to the same schema
+    # Normalize EVERYTHING
     jobs = []
     for j, s in raw:
         try:
@@ -85,15 +76,15 @@ def collect_all(cfg):
 def main():
     cfg = load_cfg()
 
-    # 1) Collect all jobs
+    # 1) Collect
     collected = collect_all(cfg)
     total_collected = len(collected)
 
-    # 2) Apply filters
+    # 2) Filter
     jobs = filter_jobs(collected, cfg)
     kept_after_filters = len(jobs)
 
-    # 3) Cap scored jobs to control cost/time
+    # 3) Cap scored jobs
     jobs = (jobs or [])[:25]
 
     # 4) Score
@@ -141,12 +132,10 @@ def main():
             if p.get("must_ask"):
                 lines.append("Questions to ask: " + "; ".join(p["must_ask"]))
             lines.append("")
-
     body = "\n".join(header + lines)
 
     # 7) Send
     send_email(cfg, "JobScoutAI — Daily Top Picks", body)
-
 
 if __name__ == "__main__":
     main()
