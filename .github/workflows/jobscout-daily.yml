@@ -38,6 +38,21 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Show repo state (config + filters)
+        run: |
+          echo "Commit: $(git rev-parse HEAD)"
+          echo "---- core/filters.py ----"
+          sed -n '1,200p' core/filters.py || true
+          echo
+          echo "---- grep for cfg[\"allowed_types\"] ----"
+          grep -Rn 'cfg\["allowed_types"\]' core || true
+          echo
+          echo "CONFIG_FILE=$CONFIG_FILE"
+          echo "---- configs/felicity.yaml ----"
+          sed -n '1,200p' configs/felicity.yaml || true
+          echo "---- config.yaml ----"
+          sed -n '1,200p' config.yaml || true
+
       - name: Install dependencies
         run: pip install -r requirements.txt
 
