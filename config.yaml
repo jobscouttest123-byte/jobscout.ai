@@ -1,8 +1,3 @@
-# ===============================
-# JobScoutAI main configuration
-# ===============================
-
-# Email settings (auth via secrets GMAIL_USER / GMAIL_PASS)
 email:
   smtp_server: smtp.gmail.com
   smtp_port: 587
@@ -10,18 +5,23 @@ email:
   to: jobscouttest123@gmail.com
   use_tls: true
 
-# How many jobs to include in the daily digest
 results_per_day: 10
 
-# Global allowances (optional; code will handle missing)
-allowed_types: ["full-time", "part-time", "contract", "casual"]
-allowed_countries: ["AU", "UK"]
-
 filters:
-  remote_only: false      # include onsite + hybrid + remote
-  recent_days: 7          # only jobs posted within last 7 days
+  remote_only: false   # include onsite + hybrid + remote
+  recent_days: 7       # only include jobs posted within last week
 
-# Salary floors (optional)
+allowed_types:
+  - full-time
+  - part-time
+  - contract
+  - casual
+  - temporary
+
+allowed_countries:
+  - AU
+  - UK
+
 salary_floor:
   au_yearly_gross: 65000
   uk_yearly_gross: 31000
