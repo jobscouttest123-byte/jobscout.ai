@@ -105,15 +105,17 @@ def main():
 
     picks = pick_top(jobs, cfg.get("results_per_day", 3)) or []
 
-    lines = ["Top picks for today:\n"]
+       lines = ["Top picks for today:\n"]
     if not picks:
         lines.append("No jobs found today.")
     else:
         for p in picks:
+            mode = p.get("work_mode", "unspecified").capitalize()
+            posted = p.get("posted_at") or "Unknown date"
             lines += [
-                f"{p.get('title')} @ {p.get('company')}",
-                f"Link: {p.get('link')}",
-                f"Source: {p.get('source', 'rss')} | Remote: {p.get('remote')}",
+                f"{p.get('title', 'Unspecified role')} @ {p.get('company', 'Unknown')}",
+                f"Link: {p.get('link', '')}",
+                f"Source: {p.get('source','unknown')} | Work mode: {mode} | Posted: {posted}",
             ]
             if p.get("llm_reasons"):
                 lines.append("Why this matches your values: " + "; ".join(p["llm_reasons"]))
@@ -122,6 +124,7 @@ def main():
             if p.get("must_ask"):
                 lines.append("Questions to ask: " + "; ".join(p["must_ask"]))
             lines.append("")
+
 
     body = "\n".join(lines)
 
