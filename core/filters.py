@@ -1,3 +1,4 @@
+# core/filters.py
 def _type_ok(job, cfg):
     et = (job.get("employment_type") or "").lower()
     allowed = [t.lower() for t in (cfg.get("allowed_types") or [])]
