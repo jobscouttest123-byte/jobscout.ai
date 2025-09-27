@@ -61,18 +61,28 @@ def _remote_ok(job, cfg):
     if not remote_only:
         return True
     return bool(job.get("remote", False))
+    
+def _exclude_keywords(job, cfg):
+    title = (job.get("title") or "").lower()
+    excluded = [(k or "").lower() for k in ((cfg.get("filters") or {}).get("exclude_keywords") or [])]
+    return not any(k in title for k in excluded)
 
 def filter_jobs(jobs, cfg):
     cfg = cfg or {}
+    fcfg = (cfg.get("filters") or {})
+    remote_only = bool(fcfg.get("remote_only", False))
+
     out = []
     for j in jobs or []:
-        if not _remote_ok(j, cfg):
+        if remote_only and not j.get("remote", False):
             continue
         if not _type_ok(j, cfg):
             continue
         if not _country_ok(j, cfg):
             continue
         if not _recent_ok(j, cfg):
+            continue
+        if not _exclude_keywords(j, cfg):   # ✅ new exclusion check
             continue
         out.append(j)
     print(f"[filters] {len(out)}/{len(jobs or [])} jobs kept after filtering")
