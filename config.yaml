@@ -9,7 +9,10 @@ results_per_day: 10
 
 filters:
   remote_only: false   # include onsite + hybrid + remote
-  recent_days: 7       # only include jobs posted within last week
+  exclude_keywords: 
+    - "assistant"
+    - "engineer"
+  recent_days: 1       # only include jobs posted within last week
 
 allowed_types:
   - full-time
@@ -21,6 +24,8 @@ allowed_types:
 allowed_countries:
   - AU
   - UK
+  - NZ
+  - IE
 
 salary_floor:
   au_yearly_gross: 65000
