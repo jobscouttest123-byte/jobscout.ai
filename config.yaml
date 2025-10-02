@@ -5,14 +5,14 @@ email:
   to: jobscouttest123@gmail.com
   use_tls: true
 
-results_per_day: 10
+results_per_day: 15          # was 10 — allow a few more to get signal
 
 filters:
-  remote_only: false   # include onsite + hybrid + remote
-  exclude_keywords: 
+  remote_only: false         # keep hybrid + onsite + remote
+  exclude_keywords:
     - "assistant"
     - "engineer"
-  recent_days: 1       # only include jobs posted within last week
+  recent_days: 7             # was 1 — expand to last week so you actually get roles
 
 allowed_types:
   - full-time
@@ -28,7 +28,7 @@ allowed_countries:
   - IE
 
 salary_floor:
-  au_yearly_gross: 65000
-  uk_yearly_gross: 31000
-  au_day_rate: 450
-  uk_day_rate: 250
+  au_yearly_gross: 60000     # was 65000 — small relax to avoid filtering out mid-level roles
+  uk_yearly_gross: 28000     # was 31000 — same logic
+  au_day_rate: 400           # was 450
+  uk_day_rate: 200           # was 250
